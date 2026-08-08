@@ -1,8 +1,10 @@
 # `keybind` grammar
 
 The grammar is stable and lives here. The **action names are not** — get those
-from `ghostty +list-actions`, and check one with
-`ghostty +explain-config --keybind=NAME`.
+from `ghostty +list-actions`, which every build has. `ghostty +explain-config
+--keybind=NAME` also describes one, but only when `capabilities.explain_config`
+is true; on a build without it that command exits non-zero for every name,
+including valid ones.
 
 ## Shape
 

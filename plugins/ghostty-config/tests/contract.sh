@@ -211,22 +211,33 @@ check_cap validate_config "$G" +validate-config --config-file="$tmp/valid"
 check_cap list_themes     "$G" +list-themes --plain
 check_cap list_keybinds   "$G" +list-keybinds --default --plain
 
-# show_config / explain_config are probed with specific flags; compare against
-# the same flags env.sh uses, read out of env.sh rather than duplicated here.
-for pair in "show_config:+show-config" "explain_config:+explain-config"; do
-	name=${pair%%:*}; act=${pair##*:}
-	probe_line=$(grep -F "\"\$bin\" $act" "$root/scripts/ghostty-env.sh" | head -1)
-	flags=$(printf '%s' "$probe_line" | sed -n "s/.*$act \([^;]*\);.*/\1/p" | sed 's/[[:space:]]*$//')
+# The flags below are hardcoded on purpose: they are a known-good way to invoke
+# each action, independent of how env.sh chooses to probe it. Reading the flags
+# back out of env.sh would make this agree with env.sh by construction — the
+# same source-coupling deleted above — and a reformatted probe line would yield
+# empty flags, a bare invocation that exits 0, and a silent pass on exactly the
+# defect this exists to catch.
+#
+# So: env.sh says false, a known-good invocation says true -> env.sh's probe is
+# using a flag this build rejects. That is the --no-pager defect, in both
+# directions, with nothing parsed.
+for pair in "show_config:+show-config:--default" "explain_config:+explain-config:--option=font-size"; do
+	name=${pair%%:*}
+	rest=${pair#*:}
+	act=${rest%%:*}
+	flags=${rest#*:}
 	reported=$(cap "$name")
 	# shellcheck disable=SC2086
 	"$G" $act $flags >/dev/null 2>&1 && actual=true || actual=false
 	if [ "$reported" = "$actual" ]; then
-		ok "$name reported $reported, binary agrees (probe: $act $flags)"
+		ok "$name reported $reported, binary agrees ($act $flags)"
+	elif [ "$reported" = "false" ] && [ "$actual" = "true" ]; then
+		bad "env.sh reports $name false, but '$act $flags' works — its probe is using a flag this build rejects"
 	else
-		bad "$name reported $reported but the binary says $actual (probe: $act $flags)"
+		bad "$name reported $reported but '$act $flags' says $actual"
 	fi
 	if [ "$actual" = "false" ] && has_action "${act#+}"; then
-		bad "$act EXISTS on this build but env.sh's probe flags are rejected: $act $flags"
+		bad "$act EXISTS on this build yet '$act $flags' fails — the known-good invocation is wrong"
 	fi
 done
 

@@ -70,15 +70,27 @@ visible in the file you're reading.
 
 ## Step 2 — resolve the request against the binary
 
-For every key you intend to write or change:
+For every key you intend to write or change, confirm it exists. **Which command
+does that depends on `capabilities.explain_config` from Step 1** — read the flag,
+don't assume:
 
 ```sh
-ghostty +explain-config --option=<key>
+# capabilities.explain_config == true
+ghostty +explain-config --option=<key>       # non-zero exit = no such key
+ghostty +explain-config --keybind=<action>   # same, for keybind actions
+
+# capabilities.explain_config == false  (every build up to and including 1.3.1)
+ghostty +show-config --default | grep -E '^<key> ='   # no match = no such key
+ghostty +list-actions | grep -qx '<action>'           # for keybind actions
 ```
 
-A non-zero exit means the key doesn't exist on this build — that's your typo
-check, and it costs one command. For keybinds use `--keybind=<action>`; for
-themes `ghostty +list-themes --plain`; for fonts `ghostty +list-fonts`.
+`+explain-config` postdates 1.3.1. On a build without it, *every* invocation
+exits non-zero — so using it unconditionally as a typo check marks every valid
+key as a typo and is worse than not checking at all. `+show-config --default`
+lists all 600-odd keys and was verified against `+validate-config` to agree on
+both real and misspelled names.
+
+For themes use `ghostty +list-themes --plain`; for fonts `ghostty +list-fonts`.
 
 If the user's request is vague ("make it look nicer", "less cramped"), propose
 two or three concrete options with the actual key names and let them pick. Don't
