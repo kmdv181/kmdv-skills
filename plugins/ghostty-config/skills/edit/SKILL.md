@@ -86,9 +86,27 @@ ghostty +list-actions | grep -qx '<action>'           # for keybind actions
 
 `+explain-config` postdates 1.3.1. On a build without it, *every* invocation
 exits non-zero — so using it unconditionally as a typo check marks every valid
-key as a typo and is worse than not checking at all. `+show-config --default`
-lists all 600-odd keys and was verified against `+validate-config` to agree on
-both real and misspelled names.
+key as a typo and is worse than not checking at all.
+
+**A missing key is not automatically a typo.** `+show-config --default` lists
+only *canonical* names, but Ghostty keeps renamed options working through a
+compatibility map (`Config.zig:compatibility`), so a deprecated alias is absent
+from that list and still valid. Validating a one-line file separates the two:
+
+```sh
+printf '%s = 1\n' "<key>" >/tmp/k.conf && ghostty +validate-config --config-file=/tmp/k.conf
+```
+
+| in `+show-config --default` | `+validate-config` | verdict |
+|---|---|---|
+| yes | accepts | current key — use it |
+| no | accepts | deprecated alias — works, but write the canonical name instead and say why |
+| no | rejects | genuine typo — do not write it |
+
+Worked example on 1.3.1: `background-blur-radius` validates clean and is absent
+from `+show-config`; it was renamed to `background-blur` in 1.1 and still maps
+through. Reporting it as a typo would be wrong; writing it verbatim would leave
+the user on a deprecated name.
 
 For themes use `ghostty +list-themes --plain`; for fonts `ghostty +list-fonts`.
 

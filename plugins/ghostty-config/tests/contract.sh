@@ -138,6 +138,39 @@ else
 fi
 
 # 5. ghostty-apply.sh's contract with itself: exit 1 must mean "not applied".
+# 5. SKILL.md Step 2 tells the agent to separate three cases: a current key, a
+#    deprecated alias that still works, and a typo. That guidance is only sound
+#    if the two commands really do disagree in the middle case — otherwise the
+#    agent either rejects working aliases or writes typos.
+echo
+echo "  --- Step 2 can tell a deprecated alias from a typo ---"
+
+"$G" +show-config --default >"$tmp/keys" 2>/dev/null
+key_verdict() {
+	printf '%s = 1\n' "$1" >"$tmp/k.conf"
+	if grep -qE "^$1 = " "$tmp/keys"; then printf 'current'
+	elif "$G" +validate-config --config-file="$tmp/k.conf" >/dev/null 2>&1; then printf 'alias'
+	else printf 'typo'
+	fi
+}
+
+v=$(key_verdict font-size)
+[ "$v" = current ] && ok "a current key reads as 'current' (font-size)" ||
+	bad "font-size read as '$v', expected current"
+
+# Named in SKILL.md as the worked example. If a future Ghostty drops the
+# compatibility entry this becomes 'typo' and the example must be rewritten.
+v=$(key_verdict background-blur-radius)
+case "$v" in
+	alias) ok "a renamed key reads as 'alias' (background-blur-radius)" ;;
+	typo)  bad "background-blur-radius now reads as 'typo' — this build dropped the compatibility entry, and SKILL.md's worked example is stale" ;;
+	*)     bad "background-blur-radius read as '$v'" ;;
+esac
+
+v=$(key_verdict font-ligatures)
+[ "$v" = typo ] && ok "an invented key reads as 'typo' (font-ligatures)" ||
+	bad "font-ligatures read as '$v', expected typo"
+
 echo
 echo "  --- every command the docs tell the agent to run ---"
 
@@ -157,9 +190,13 @@ while IFS= read -r cmd; do
 	[ -n "$action" ] || continue
 	is_interactive "$action" && { info "skipped (interactive): $cmd"; continue; }
 
-	# Substitute the doc placeholders with something real.
+	# Substitute the doc placeholders with something real. Every --config-file=
+	# is repointed at this run's own fixture, whatever the docs wrote there: the
+	# sweep is asking "does this invocation work", and a literal path from a doc
+	# example is either absent or — worse — present with stale contents from an
+	# earlier run, which reports a defect that is really just leftover state.
 	real=$(printf '%s' "$cmd" |
-		sed -e "s|--config-file=PATH|--config-file=$tmp/valid|" \
+		sed -e "s|--config-file=[^ ]*|--config-file=$tmp/valid|" \
 		    -e 's|--option=<key>|--option=font-size|' \
 		    -e 's|--keybind=<action>|--keybind=copy_to_clipboard|' \
 		    -e 's|--keybind=NAME|--keybind=copy_to_clipboard|')
