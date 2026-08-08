@@ -43,10 +43,34 @@ after a compaction rather than quietly disappearing mid-session.
 
 ## Codex
 
-The same plugin is designed to work under Codex CLI, which reads plugin hooks
-from the same `hooks/hooks.json` path, accepts the same
-`hookSpecificOutput.additionalContext` payload, and supplies
-`CLAUDE_PLUGIN_ROOT` to plugin-bundled hooks as a compatibility variable.
+The same plugin works under Codex CLI. Codex discovers it through this repo's
+`.claude-plugin/marketplace.json` — no separate marketplace file is needed —
+reads plugin hooks from the same `hooks/hooks.json` path, accepts the same
+`hookSpecificOutput.additionalContext` payload, and supplies `CLAUDE_PLUGIN_ROOT`
+to plugin-bundled hooks as a compatibility variable. A `.codex-plugin/plugin.json`
+sits alongside the Claude manifest; each CLI ignores the other's.
+
+```
+codex plugin marketplace add kmdv181/skills
+codex plugin add always-english-artifacts@kmdv181
+```
+
+**Then trust the hook, once per machine.** Installing or enabling a plugin does
+not trust its hooks — Codex skips plugin-bundled hooks until you review and
+approve the current hook definition, and it does so silently. Start Codex
+interactively once and approve; until you do, the plugin reports as `installed,
+enabled` while injecting nothing. To confirm without the interactive step:
+
+```
+printf 'One word, YES or NO: is a block titled "Artifact language" in your context?' \
+  | codex exec --dangerously-bypass-hook-trust -
+```
+
+The trust hash covers the hook definition, so editing `hooks/hooks.json` requires
+re-approval. Editing the rule text does not — the payload is a separate file.
+
+Claude Code has no equivalent gate; the plugin takes effect there on the next
+session after install.
 
 ## Editing the rule
 
