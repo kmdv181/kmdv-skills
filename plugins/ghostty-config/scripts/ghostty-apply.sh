@@ -1,0 +1,143 @@
+#!/bin/sh
+# Apply a new Ghostty config safely.
+#
+#   ghostty-apply.sh --new FILE [--config PATH] [--dry-run] [--no-validate]
+#
+# The real config is never in a broken state, not even briefly. The candidate is
+# validated on disk *before* anything is overwritten, and only a clean validation
+# is followed by the move.
+#
+# Why the candidate is written next to the real config and not to /tmp:
+# `+validate-config --config-file=X` calls loadRecursiveFiles(), and `config-file =`
+# includes resolve relative to the file that contains them. A candidate validated
+# from a temp directory would fail to find the user's relative includes and report
+# a verdict about a file that isn't the one being installed.
+#
+# Exit codes:
+#   0  applied (or, with --dry-run, the candidate validates)
+#   1  validation failed — the real config was not touched
+#   2  cannot proceed (no ghostty binary, unreadable input, bad arguments)
+
+set -u
+
+new_file=""
+config_path=""
+dry_run=1
+validate=0
+
+die() { printf 'ghostty-apply: %s\n' "$1" >&2; exit "${2:-2}"; }
+
+while [ $# -gt 0 ]; do
+	case "$1" in
+		--new)         [ $# -ge 2 ] || die "--new needs a path"; new_file="$2"; shift 2 ;;
+		--config)      [ $# -ge 2 ] || die "--config needs a path"; config_path="$2"; shift 2 ;;
+		--dry-run)     dry_run=0; shift ;;
+		--no-validate) validate=1; shift ;;
+		-h|--help)
+			sed -n '2,20p' "$0" | sed 's/^# \{0,1\}//'
+			exit 0 ;;
+		*) die "unknown argument: $1" ;;
+	esac
+done
+
+[ -n "$new_file" ] || die "--new FILE is required"
+[ -r "$new_file" ] || die "cannot read candidate file: $new_file"
+
+script_dir="$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)"
+
+# ------------------------------------------------------------- resolve targets
+
+if [ -z "$config_path" ]; then
+	config_path="$(sh "$script_dir/ghostty-env.sh" |
+		sed -n 's/^  "config_path": "\(.*\)",$/\1/p' |
+		sed -e 's/\\"/"/g' -e 's/\\\\/\\/g')"
+fi
+[ -n "$config_path" ] || die "could not determine the config path; pass --config"
+
+config_dir="$(dirname -- "$config_path")"
+mkdir -p -- "$config_dir" || die "cannot create config directory: $config_dir"
+
+ghostty_bin="${GHOSTTY_BIN:-}"
+if [ -z "$ghostty_bin" ]; then
+	if command -v ghostty >/dev/null 2>&1; then
+		ghostty_bin="$(command -v ghostty)"
+	elif [ -x "/Applications/Ghostty.app/Contents/MacOS/ghostty" ]; then
+		ghostty_bin="/Applications/Ghostty.app/Contents/MacOS/ghostty"
+	elif [ -x "$HOME/Applications/Ghostty.app/Contents/MacOS/ghostty" ]; then
+		ghostty_bin="$HOME/Applications/Ghostty.app/Contents/MacOS/ghostty"
+	fi
+fi
+
+if [ "$validate" -eq 0 ] && [ -z "$ghostty_bin" ]; then
+	die "no ghostty binary found, so the change cannot be validated.
+Install this plugin on the machine Ghostty runs on, set GHOSTTY_BIN, or re-run
+with --no-validate to write the file unchecked." 2
+fi
+
+# --------------------------------------------------------- stage the candidate
+
+# Neither `config.ghostty` nor `config` — Ghostty matches those filenames
+# exactly, so this staging file is inert even if a crash leaves it behind.
+candidate="$config_dir/$(basename -- "$config_path").ghostty-plugin-candidate"
+cleanup() { rm -f -- "$candidate"; }
+trap cleanup EXIT INT TERM
+
+# Seed the candidate from the current config so it inherits the file's mode, then
+# truncate it in place. `>` on an existing file keeps its permissions, so a 0600
+# config stays 0600 instead of picking up whatever the umask says. Avoids `stat`,
+# whose -c/-f flags mean different things on GNU and BSD.
+if [ -e "$config_path" ]; then
+	cp -p -- "$config_path" "$candidate" || die "cannot stage candidate: $candidate"
+fi
+cat -- "$new_file" >"$candidate" || die "cannot write candidate: $candidate"
+
+# ------------------------------------------------------------------- validate
+
+if [ "$validate" -eq 0 ]; then
+	diagnostics="$("$ghostty_bin" +validate-config --config-file="$candidate" 2>&1)"
+	rc=$?
+	if [ "$rc" -ne 0 ]; then
+		printf 'Validation FAILED. The existing config was not modified.\n\n'
+		# Diagnostics name the staging file; report the path the user recognises.
+		printf '%s\n' "$diagnostics" | sed "s|$candidate|$config_path|g"
+		exit 1
+	fi
+	printf 'Validation passed (%s).\n' "$(basename -- "$ghostty_bin")"
+else
+	printf 'Validation SKIPPED (--no-validate): the result is unverified.\n'
+fi
+
+# ----------------------------------------------------------------------- diff
+
+printf '\n--- diff: %s ---\n' "$config_path"
+if [ -e "$config_path" ]; then
+	if diff -u -- "$config_path" "$candidate"; then
+		printf '(no changes)\n'
+		exit 0
+	fi
+else
+	printf '(new file — %s does not exist yet)\n' "$config_path"
+	sed 's/^/+/' <"$candidate"
+fi
+
+if [ "$dry_run" -eq 0 ]; then
+	printf '\nDry run: nothing was written.\n'
+	exit 0
+fi
+
+# --------------------------------------------------------------- back up + move
+
+backup_dir="${XDG_STATE_HOME:-$HOME/.local/state}/ghostty-config-plugin/backups"
+if [ -e "$config_path" ]; then
+	mkdir -p -- "$backup_dir" || die "cannot create backup directory: $backup_dir"
+	backup="$backup_dir/$(date +%Y%m%d-%H%M%S)-$(basename -- "$config_path")"
+	cp -p -- "$config_path" "$backup" || die "backup failed; refusing to overwrite"
+	printf '\nBacked up to: %s\n' "$backup"
+	# Record where this backup came from so restore never guesses.
+	printf '%s\n' "$config_path" >"$backup.origin"
+fi
+
+mv -- "$candidate" "$config_path" || die "failed to install the new config"
+trap - EXIT
+printf 'Wrote: %s\n' "$config_path"
+printf 'Reload Ghostty with cmd+shift+, (macOS) or ctrl+shift+, (Linux).\n'

@@ -1,0 +1,33 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "181-lab",
+  "description": "181 Lab — Claude Code plugins and skills by kmdv.",
+  "owner": {
+    "name": "181 Lab",
+    "email": "i@kmdv.dev"
+  },
+  "plugins": [
+    {
+      "name": "kmdv",
+      "source": "./plugins/kmdv",
+      "description": "Personal skills — everything kmdv builds for day-to-day work, in one installable bundle.",
+      "category": "productivity",
+      "version": "0.1.0",
+      "author": {
+        "name": "kmdv",
+        "email": "i@kmdv.dev"
+      }
+    },
+    {
+      "name": "ghostty-config",
+      "source": "./plugins/ghostty-config",
+      "description": "Edit your Ghostty terminal config by talking to Claude — validates every change before it touches the real file, and keeps rollbackable backups.",
+      "category": "productivity",
+      "version": "0.1.0",
+      "author": {
+        "name": "kmdv",
+        "email": "i@kmdv.dev"
+      }
+    }
+  ]
+}

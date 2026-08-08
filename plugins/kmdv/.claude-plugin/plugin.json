@@ -1,0 +1,15 @@
+{
+  "name": "kmdv",
+  "version": "0.1.0",
+  "description": "Personal skills by kmdv — invoked as /kmdv:<skill>. Drop a skill into skills/ and it ships with the next update.",
+  "author": {
+    "name": "kmdv",
+    "email": "i@kmdv.dev"
+  },
+  "license": "MIT",
+  "keywords": [
+    "skills",
+    "personal",
+    "productivity"
+  ]
+}
