@@ -43,12 +43,12 @@ after a compaction rather than quietly disappearing mid-session.
 
 ## Codex
 
-The same plugin works under Codex CLI. Codex discovers it through this repo's
-`.claude-plugin/marketplace.json` — no separate marketplace file is needed —
-reads plugin hooks from the same `hooks/hooks.json` path, accepts the same
-`hookSpecificOutput.additionalContext` payload, and supplies `CLAUDE_PLUGIN_ROOT`
-to plugin-bundled hooks as a compatibility variable. A `.codex-plugin/plugin.json`
-sits alongside the Claude manifest; each CLI ignores the other's.
+The same plugin works under Codex CLI, unmodified. Codex discovers it through
+this repo's `.claude-plugin/marketplace.json` — no separate marketplace or
+manifest file is needed — reads plugin hooks from the same `hooks/hooks.json`
+path, accepts the same `hookSpecificOutput.additionalContext` payload, and
+supplies `CLAUDE_PLUGIN_ROOT` to plugin-bundled hooks as a compatibility
+variable.
 
 ```
 codex plugin marketplace add kmdv181/skills
