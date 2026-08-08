@@ -25,12 +25,16 @@ you're SSH'd into from a Ghostty window.
 Set `GHOSTTY_BIN` if your install isn't on `PATH` and isn't at
 `/Applications/Ghostty.app/Contents/MacOS/ghostty`.
 
-## Commands
+## Skills
 
-| Command | What it does |
+| Skill | What it does |
 |---|---|
-| `/ghostty-config [request]` | Make a change. With no argument, explains your current config first. |
-| `/ghostty-config-undo [backup]` | Roll back to a backup. Defaults to the most recent. |
+| `/ghostty-config:ghostty-config [request]` | Make a change. With no argument, explains your current config first. |
+| `/ghostty-config:ghostty-config-undo [backup]` | Roll back to a backup. Defaults to the most recent. |
+
+Plugin skills are namespaced with the plugin name, which is why the prefix
+repeats. Both also load on their own when you ask about Ghostty settings in
+conversation — the explicit invocation is rarely the way you'll reach them.
 
 The `ghostty-config` skill also loads on its own when you ask about Ghostty
 settings in conversation — you don't have to use the slash commands.

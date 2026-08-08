@@ -47,6 +47,16 @@ falsifiable — and falsifiable is the whole difference.
   thing first — a stub encoding your mistake will agree with you every time.
 - The user noticing later.
 
+## `marketplace.json` is shared; plugin directories are not
+
+Each plugin is one person's or one session's territory. `.claude-plugin/marketplace.json`
+is the only file everyone edits, so touch **only your own plugin's entry** in it —
+never reformat, reorder or rewrite the whole file, or you will silently revert
+work in flight elsewhere. Whoever builds a plugin adds its entry.
+
+Don't validate, version or "tidy" a plugin you didn't write. If something in one
+looks broken, say so; don't fix it.
+
 ## Stage explicitly. Never `git add -A`
 
 List the paths you changed. This repository gets worked on from more than one
