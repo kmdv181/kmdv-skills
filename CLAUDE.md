@@ -65,6 +65,13 @@ ten files — into a commit whose message described something else, and pushed i
 public. Before committing, run `git status` and account for every line: if you
 cannot say why a path is there, it is not yours to commit.
 
+Then check that the staging worked. `git add` is **atomic**: one unmatched
+pathspec — a directory you already removed, a typo — aborts the entire invocation
+and stages *nothing*, while the shell carries on to your `git commit`. That has
+already pushed a tree here with a file deleted and its replacement missing. Run
+`git diff --cached --name-status` and confirm it lists what you expect before
+committing.
+
 ## Shipping a change to an installed plugin
 
 An installed plugin is cached at `~/.claude/plugins/cache/<marketplace>/<plugin>/<version>`,
