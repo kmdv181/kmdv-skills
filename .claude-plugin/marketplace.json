@@ -23,7 +23,7 @@
       "source": "./plugins/ghostty-config",
       "description": "Edit your Ghostty terminal config by talking to Claude — validates every change before it touches the real file, and keeps rollbackable backups.",
       "category": "productivity",
-      "version": "0.1.4",
+      "version": "0.1.5",
       "author": {
         "name": "kmdv",
         "email": "i@kmdv.dev"

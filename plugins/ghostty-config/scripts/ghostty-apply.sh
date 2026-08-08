@@ -99,6 +99,13 @@ if [ -e "$config_path" ]; then
 fi
 cat -- "$new_file" >"$candidate" || die "cannot write candidate: $candidate"
 
+# "Strip my config back to defaults" produces an empty candidate, and
+# `+validate-config --config-file=` on a zero-byte file exits 1 printing nothing
+# — so a legitimate request dead-ended as an unexplained validation failure. A
+# lone newline is the smallest file the binary accepts and is identical in
+# effect: no statements, everything falls back to the defaults.
+[ -s "$candidate" ] || printf '\n' >"$candidate"
+
 # ------------------------------------------------------------------- validate
 
 if [ "$validate" -eq 0 ]; then

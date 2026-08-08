@@ -297,20 +297,23 @@ apply --config "$CONFIG" >/dev/null 2>&1
 apply --new "$SBOX/nope" --config "$CONFIG" >/dev/null 2>&1
 [ $? -eq 2 ] && ok "an unreadable candidate exits 2" || bad "an unreadable candidate did not exit 2"
 
-# An empty candidate — "strip my config back to defaults".
+# An empty candidate — "strip my config back to defaults". Ghostty rejects a
+# zero-byte config file in silence, so this must not reach the binary as one.
 new_sandbox
 printf 'font-size = 10\n' >"$CONFIG"
 : >"$SBOX/cand"
-out=$(apply --new "$SBOX/cand" --config "$CONFIG" 2>&1); rc=$?
-if [ "$rc" -eq 0 ]; then
-	ok "an empty candidate applies cleanly"
-else
-	[ "$(cat "$CONFIG")" = "font-size = 10" ] && ok "an empty candidate fails safe (config untouched)" ||
-		bad "an empty candidate failed AND modified the config"
-	body=$(printf '%s' "$out" | sed -e 's/Validation FAILED.*//' -e '/^$/d')
-	[ -n "$body" ] && ok "the empty-candidate failure explains itself" ||
-		info "KNOWN GAP: an empty candidate fails with no diagnostics (ghostty rejects 0-byte files silently)"
-fi
+apply --new "$SBOX/cand" --config "$CONFIG" >/dev/null 2>&1
+rc=$?
+[ "$rc" -eq 0 ] && ok "an empty candidate applies cleanly" ||
+	bad "an empty candidate exited $rc — clearing the config is a dead end"
+[ -s "$CONFIG" ] && ok "the cleared config is not zero bytes (ghostty rejects those)" ||
+	bad "the cleared config is zero bytes; ghostty will reject it on next load"
+[ "$(wc -c <"$CONFIG" | tr -d ' ')" -eq 1 ] && ok "the cleared config is exactly one newline" ||
+	bad "the cleared config is $(wc -c <"$CONFIG" | tr -d ' ') bytes, expected 1"
+b=$(backup_files | head -1)
+[ -n "$b" ] && [ "$(cat "$b")" = "font-size = 10" ] &&
+	ok "clearing the config is still backed up and undoable" ||
+	bad "clearing the config took no usable backup"
 
 # ============================================================== ghostty-undo.sh
 
