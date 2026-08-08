@@ -140,13 +140,16 @@ silence a real diagnostic.
 
 ```sh
 sh "${CLAUDE_PLUGIN_ROOT}/scripts/ghostty-undo.sh" --list
-sh "${CLAUDE_PLUGIN_ROOT}/scripts/ghostty-undo.sh" --diff [BACKUP]
-sh "${CLAUDE_PLUGIN_ROOT}/scripts/ghostty-undo.sh" --restore [BACKUP]
+sh "${CLAUDE_PLUGIN_ROOT}/scripts/ghostty-undo.sh" --diff <N>
+sh "${CLAUDE_PLUGIN_ROOT}/scripts/ghostty-undo.sh" --restore <N>
 ```
 
-With no argument these use the newest backup. Restoring routes back through
-`ghostty-apply.sh`, so it is validated, diffed and itself backed up — an undo can
-be undone.
+The `ghostty-config-undo` skill owns this flow — hand off to it rather than
+reimplementing the steps here. The short version: the ring holds the five most
+recent backups, `--restore` refuses to run without an explicit target, and you
+show the list and let the user pick. Never choose for them; a restore is itself
+an apply that takes its own backup, so "the newest" means something different
+after every undo.
 
 ## Diagnosing "my config isn't working"
 

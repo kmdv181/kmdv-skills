@@ -128,13 +128,45 @@ fi
 # --------------------------------------------------------------- back up + move
 
 backup_dir="${XDG_STATE_HOME:-$HOME/.local/state}/ghostty-config-plugin/backups"
+backup_keep="${GHOSTTY_BACKUP_KEEP:-5}"
+
+# Keep the ring at `backup_keep` entries, newest first. Names begin with a
+# timestamp, so a reverse lexical sort is a reverse chronological one — but only
+# under LC_ALL=C. Locale collation ignores punctuation and silently reordered
+# these, which pruned the newest entry instead of the oldest. Each backup's
+# `.origin` sidecar goes with it.
+prune_backups() {
+	case "$backup_keep" in
+		''|*[!0-9]*) return 0 ;;   # not a number: keep everything rather than guess
+		0) return 0 ;;             # 0 means unlimited
+	esac
+	find "$backup_dir" -maxdepth 1 -type f ! -name '*.origin' 2>/dev/null |
+		LC_ALL=C sort -r | tail -n "+$((backup_keep + 1))" |
+		while IFS= read -r old; do
+			rm -f -- "$old" "$old.origin"
+		done
+}
+
 if [ -e "$config_path" ]; then
 	mkdir -p -- "$backup_dir" || die "cannot create backup directory: $backup_dir"
-	backup="$backup_dir/$(date +%Y%m%d-%H%M%S)-$(basename -- "$config_path")"
+	stamp="$(date +%Y%m%d-%H%M%S)"
+	base="$(basename -- "$config_path")"
+
+	# Several applies can land in the same second, so the name always carries a
+	# counter. It is the highest existing counter for this second plus one — not
+	# the first free slot. Pruning deletes oldest-first, which frees low numbers;
+	# reusing one would produce a name that sorts as the *oldest* and gets pruned
+	# on the very next write, silently destroying the newest backup.
+	last="$(find "$backup_dir" -maxdepth 1 -name "$stamp.*-$base" ! -name '*.origin' 2>/dev/null |
+		sed -n "s|.*/$stamp\.0*\([0-9][0-9]*\)-.*|\1|p" | LC_ALL=C sort -n | tail -1)"
+	# Zero-padded so .10 sorts after .02. Past 99 writes in one second the
+	# ordering would degrade, which is not a rate this tool can be driven at.
+	backup="$(printf '%s/%s.%02d-%s' "$backup_dir" "$stamp" "$(( ${last:-0} + 1 ))" "$base")"
 	cp -p -- "$config_path" "$backup" || die "backup failed; refusing to overwrite"
-	printf '\nBacked up to: %s\n' "$backup"
 	# Record where this backup came from so restore never guesses.
 	printf '%s\n' "$config_path" >"$backup.origin"
+	printf '\nBacked up to: %s\n' "$backup"
+	prune_backups
 fi
 
 mv -- "$candidate" "$config_path" || die "failed to install the new config"

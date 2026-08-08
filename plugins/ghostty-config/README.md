@@ -78,8 +78,15 @@ Your config is never briefly broken, so rollback is a user-facing undo rather
 than an error path.
 
 Backups go to `${XDG_STATE_HOME:-~/.local/state}/ghostty-config-plugin/backups/`
-as `<timestamp>-<basename>`, each with an `.origin` sidecar recording which file
-it came from. Nothing is written into `Application Support`.
+as `<timestamp>.<NN>-<basename>`, each with an `.origin` sidecar recording which
+file it came from. Nothing is written into `Application Support`.
+
+The ring keeps the **five** most recent and deletes the rest; set
+`GHOSTTY_BACKUP_KEEP` to change the count, or `0` for unlimited. Undos count
+against the ring, because a restore is an ordinary apply and takes its own
+backup — which is also why `--restore` refuses to run without you naming a
+target. "The newest backup" means something different after every undo, so the
+tool makes you look at the list rather than guessing on your behalf.
 
 ## Scripts
 
