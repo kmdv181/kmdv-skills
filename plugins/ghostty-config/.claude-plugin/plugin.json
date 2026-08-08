@@ -1,6 +1,6 @@
 {
   "name": "ghostty-config",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Edit your Ghostty terminal config by talking to Claude. Locates the config the same way Ghostty does, validates every change with `ghostty +validate-config` before it touches the real file, and keeps timestamped backups you can roll back. Install it on the machine Ghostty runs on.",
   "author": {
     "name": "kmdv",

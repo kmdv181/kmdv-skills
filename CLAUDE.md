@@ -47,6 +47,33 @@ falsifiable — and falsifiable is the whole difference.
   thing first — a stub encoding your mistake will agree with you every time.
 - The user noticing later.
 
+## Stage explicitly. Never `git add -A`
+
+List the paths you changed. This repository gets worked on from more than one
+session at a time, and `git add -A` has already swept an entire unrelated plugin —
+ten files — into a commit whose message described something else, and pushed it
+public. Before committing, run `git status` and account for every line: if you
+cannot say why a path is there, it is not yours to commit.
+
+## Shipping a change to an installed plugin
+
+An installed plugin is cached at `~/.claude/plugins/cache/<marketplace>/<plugin>/<version>`,
+keyed by **version string**. `claude plugin update` compares that string, not the
+commit — so pushing to `main` without a version bump reaches nobody. It reports
+"already at the latest version" while serving stale files.
+
+So for any change that should reach a user:
+
+1. Bump the patch version in **both** `plugins/<name>/.claude-plugin/plugin.json`
+   and that plugin's entry in `.claude-plugin/marketplace.json`.
+2. `claude plugin tag ./plugins/<name>` — validates that the two agree and creates
+   the release tag. `claude plugin validate --strict` does **not** catch this
+   mismatch, despite the docs saying it warns.
+3. Push, then `claude plugin marketplace update <marketplace>` and
+   `claude plugin update <plugin>@<marketplace>`.
+4. Confirm with `claude plugin details` that the inventory changed. If it didn't,
+   the change did not ship, whatever the commands reported.
+
 ## Facts worth not re-deriving
 
 - The marketplace name is `kmdv181`, from `.claude-plugin/marketplace.json`. It is
