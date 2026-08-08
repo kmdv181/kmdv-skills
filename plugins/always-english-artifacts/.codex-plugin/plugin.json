@@ -1,0 +1,19 @@
+{
+  "name": "always-english-artifacts",
+  "version": "0.1.0",
+  "description": "Keep everything that outlives the conversation in English — code, comments, Markdown, commit messages, PR bodies, issue text — while you keep talking to the agent in whatever language you like.",
+  "author": {
+    "name": "kmdv",
+    "email": "i@kmdv.dev"
+  },
+  "license": "MIT",
+  "keywords": [
+    "language",
+    "english",
+    "conventions",
+    "i18n",
+    "hooks",
+    "commit-messages"
+  ],
+  "hooks": "./hooks/hooks.json"
+}
