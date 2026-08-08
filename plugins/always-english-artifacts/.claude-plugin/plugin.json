@@ -1,0 +1,18 @@
+{
+  "name": "always-english-artifacts",
+  "version": "0.1.0",
+  "description": "Keep everything that outlives the conversation in English — code, comments, Markdown, commit messages, PR bodies, issue text — while you keep talking to the agent in whatever language you like. Injected at session start, so it applies to every turn rather than waiting to be invoked.",
+  "author": {
+    "name": "kmdv",
+    "email": "i@kmdv.dev"
+  },
+  "license": "MIT",
+  "keywords": [
+    "language",
+    "english",
+    "conventions",
+    "i18n",
+    "hooks",
+    "commit-messages"
+  ]
+}

@@ -1,12 +1,17 @@
 ---
 name: ghostty-config
 description: Read, explain and edit the Ghostty terminal configuration file conversationally. Use when the user wants to change how their terminal looks or behaves — themes, fonts, colors, padding, cursor, transparency, keybinds, shell integration, window behaviour — or asks what a Ghostty config key does, why a setting isn't taking effect, or wants to undo a config change.
+argument-hint: [what to change, e.g. "dark theme, font 15, tmux-style splits"]
+allowed-tools: Read, Write, Edit, Glob, Grep, Bash(sh:*), Bash(ghostty:*), Bash(/Applications/Ghostty.app/Contents/MacOS/ghostty:*)
 ---
 
 # Editing a Ghostty config
 
 The user describes what they want in plain language. You turn that into config
 lines, prove they're valid, show the diff, and write only after they agree.
+
+Invoked with an argument, treat it as the request. Invoked with none, read their
+current config and walk them through what it sets before asking what to change.
 
 Two rules carry most of the weight:
 

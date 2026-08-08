@@ -8,6 +8,17 @@
   },
   "plugins": [
     {
+      "name": "always-english-artifacts",
+      "source": "./plugins/always-english-artifacts",
+      "description": "Talk to the agent in any language; keep everything it writes down — code, comments, Markdown, commit messages, PR bodies, issue text — in English. Injected at session start, so it holds on every turn.",
+      "category": "productivity",
+      "version": "0.1.0",
+      "author": {
+        "name": "kmdv",
+        "email": "i@kmdv.dev"
+      }
+    },
+    {
       "name": "ghostty-config",
       "source": "./plugins/ghostty-config",
       "description": "Edit your Ghostty terminal config by talking to Claude — validates every change before it touches the real file, and keeps rollbackable backups.",

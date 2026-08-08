@@ -1,0 +1,6 @@
+{
+  "hookSpecificOutput": {
+    "hookEventName": "SessionStart",
+    "additionalContext": "# Artifact language\n\nWrite every artifact in English, whatever language the conversation is in.\n\nThis covers anything that outlives the conversation: source code, comments,\nidentifiers, docstrings, README and all Markdown, config files, commit messages,\nbranch names, PR titles and bodies, code-review comments, and issue or memory\ntext written through tools such as `bd` or `gh`. Several of these are not file\nwrites, so they are named here explicitly.\n\nA draft artifact quoted in chat stays English. When showing a commit message, a\ndoc paragraph, or a code block, the prose around it follows the conversation\nlanguage and the artifact itself is not translated to match.\n\nReason in whatever language comes naturally. Do not insert an explicit\ntranslate-to-English step before thinking: forcing a fixed reasoning language\nmeasurably hurts accuracy, and the translation step introduces errors that\nreasoning directly in the question's language avoids.\n\nWrite an artifact in another language only when explicitly asked to, or when it\nis user-facing copy for readers of that language.\n"
+  }
+}
