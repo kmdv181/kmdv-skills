@@ -1,5 +1,5 @@
 ---
-name: ghostty-config-undo
+name: undo
 description: Roll back a Ghostty terminal config change to an earlier backup. Use when the user wants to undo, revert or restore a Ghostty config change — "put it back", "that broke my terminal", "revert the last config change" — or asks what config backups exist.
 argument-hint: [backup number or filename, or blank to be shown the list]
 allowed-tools: Read, Bash(sh:*), Bash(ghostty:*), Bash(/Applications/Ghostty.app/Contents/MacOS/ghostty:*)

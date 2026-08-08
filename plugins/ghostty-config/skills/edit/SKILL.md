@@ -1,5 +1,5 @@
 ---
-name: ghostty-config
+name: edit
 description: Read, explain and edit the Ghostty terminal configuration file conversationally. Use when the user wants to change how their terminal looks or behaves — themes, fonts, colors, padding, cursor, transparency, keybinds, shell integration, window behaviour — or asks what a Ghostty config key does, why a setting isn't taking effect, or wants to undo a config change.
 argument-hint: [what to change, e.g. "dark theme, font 15, tmux-style splits"]
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash(sh:*), Bash(ghostty:*), Bash(/Applications/Ghostty.app/Contents/MacOS/ghostty:*)
@@ -144,7 +144,7 @@ sh "${CLAUDE_PLUGIN_ROOT}/scripts/ghostty-undo.sh" --diff <N>
 sh "${CLAUDE_PLUGIN_ROOT}/scripts/ghostty-undo.sh" --restore <N>
 ```
 
-The `ghostty-config-undo` skill owns this flow — hand off to it rather than
+The `undo` skill owns this flow — hand off to it rather than
 reimplementing the steps here. The short version: the ring holds the five most
 recent backups, `--restore` refuses to run without an explicit target, and you
 show the list and let the user pick. Never choose for them; a restore is itself

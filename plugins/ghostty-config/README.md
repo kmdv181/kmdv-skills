@@ -4,7 +4,7 @@ A Claude Code plugin for editing the [Ghostty](https://ghostty.org) terminal
 configuration by describing what you want.
 
 ```
-/ghostty-config switch to a dark theme, bump the font to 15, and give me tmux-style splits
+/ghostty-config:edit switch to a dark theme, bump the font to 15, and give me tmux-style splits
 ```
 
 Claude finds your config the same way Ghostty does, checks every key against your
@@ -29,15 +29,12 @@ Set `GHOSTTY_BIN` if your install isn't on `PATH` and isn't at
 
 | Skill | What it does |
 |---|---|
-| `/ghostty-config:ghostty-config [request]` | Make a change. With no argument, explains your current config first. |
-| `/ghostty-config:ghostty-config-undo [backup]` | Roll back to a backup. Defaults to the most recent. |
+| `/ghostty-config:edit [request]` | Make a change. With no argument, explains your current config first. |
+| `/ghostty-config:undo [N]` | Roll back to one of the last five backups. Shows the list if you don't name one. |
 
-Plugin skills are namespaced with the plugin name, which is why the prefix
-repeats. Both also load on their own when you ask about Ghostty settings in
-conversation — the explicit invocation is rarely the way you'll reach them.
-
-The `ghostty-config` skill also loads on its own when you ask about Ghostty
-settings in conversation — you don't have to use the slash commands.
+Plugin skills are namespaced with the plugin name, which is where the prefix
+comes from. Both also load on their own when you ask about Ghostty settings in
+conversation — the explicit invocation is rarely how you'll reach them.
 
 ## Why it doesn't ship a list of config keys
 
