@@ -14,6 +14,11 @@ Refresh after pushing changes here:
 /plugin marketplace update 181-lab
 ```
 
+The `kmdv181/181lab-skills` part is just this repository's path — update it here and
+in `plugins/ghostty-config/README.md` if the repo is ever renamed. The marketplace
+name (`181-lab`), which is what `@181-lab` refers to, comes from
+`.claude-plugin/marketplace.json` and does not follow the repo name.
+
 ## Plugins
 
 | Plugin | What it is |
