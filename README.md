@@ -4,7 +4,6 @@ A personal marketplace: `kmdv181`. Add it once, then install anything from it.
 
 ```
 /plugin marketplace add kmdv181/kmdv-skills
-/plugin install kmdv@kmdv181
 /plugin install ghostty-config@kmdv181
 ```
 
@@ -26,7 +25,6 @@ anything requires it.
 
 | Plugin | What it is |
 |---|---|
-| [`kmdv`](plugins/kmdv) | Personal skills, invoked as `/kmdv:<skill>`. Currently empty — a home to grow into. |
 | [`ghostty-config`](plugins/ghostty-config) | Conversational editing of the Ghostty terminal config, with validation before write and rollback. |
 
 ## Layout
