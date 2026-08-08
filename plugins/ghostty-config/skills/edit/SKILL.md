@@ -64,7 +64,7 @@ Read it before anything else, and react to what it says:
   `references/syntax.md` for the full ordering.
 
 Then read the current config with the Read tool. Also run
-`ghostty +show-config --no-pager` — it shows the *effective* changed-from-default
+`ghostty +show-config` — it shows the *effective* changed-from-default
 settings, which catches values inherited from an included file that aren't
 visible in the file you're reading.
 
@@ -157,7 +157,7 @@ Work outward from cheapest to most expensive:
 
 1. `ghostty +validate-config` (no `--config-file`) — validates the live default
    paths. Syntax and unknown-key errors surface here.
-2. `ghostty +show-config --no-pager` — the effective changed-from-default values.
+2. `ghostty +show-config` — the effective changed-from-default values.
    If the key isn't listed, it never took; if it's listed with a value the user
    didn't write, something else set it.
 3. Check `candidates` from the probe for a second config file overriding the

@@ -57,7 +57,15 @@ fi
 config_dir="$(dirname -- "$config_path")"
 mkdir -p -- "$config_dir" || die "cannot create config directory: $config_dir"
 
+# A GHOSTTY_BIN that points at nothing is a broken install, not a broken config.
+# Without this check the missing binary surfaces as "Validation FAILED", which
+# sends the user to fix a file that is fine. ghostty-env.sh already reports
+# bin:null for the same value; this keeps the two consistent.
 ghostty_bin="${GHOSTTY_BIN:-}"
+if [ -n "$ghostty_bin" ] && [ ! -x "$ghostty_bin" ]; then
+	die "GHOSTTY_BIN is set to '$ghostty_bin', which is not an executable file.
+Unset it to search the usual locations, or point it at the real ghostty binary." 2
+fi
 if [ -z "$ghostty_bin" ]; then
 	if command -v ghostty >/dev/null 2>&1; then
 		ghostty_bin="$(command -v ghostty)"

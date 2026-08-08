@@ -122,18 +122,28 @@ cap_keybinds=1
 if [ -n "$bin" ]; then
 	version="$("$bin" +version 2>/dev/null | grep -v '^[[:space:]]*$' | head -1)"
 
-	# An empty file has no `config-file` includes, so validating it from a temp
-	# directory is sound — unlike a real candidate, which must sit next to the
-	# config it replaces.
+	# A file with no settings has no `config-file` includes, so validating it from
+	# a temp directory is sound — unlike a real candidate, which must sit next to
+	# the config it replaces.
+	#
+	# It must not be *zero bytes*: `+validate-config --config-file=` on an empty
+	# file exits 1 in silence on Ghostty 1.3.1, which made this probe report
+	# validate_config:false on a perfectly healthy install. A lone newline is the
+	# smallest fixture the binary accepts. tests/contract.sh checks this against
+	# the real binary, in both directions.
 	probe_dir="${TMPDIR:-/tmp}/ghostty-config-plugin-probe.$$"
-	mkdir -p "$probe_dir" 2>/dev/null && : >"$probe_dir/empty"
-	if [ -f "$probe_dir/empty" ]; then
-		probe "$bin" +validate-config --config-file="$probe_dir/empty"
+	mkdir -p "$probe_dir" 2>/dev/null && printf '\n' >"$probe_dir/probe"
+	if [ -s "$probe_dir/probe" ]; then
+		probe "$bin" +validate-config --config-file="$probe_dir/probe"
 		cap_validate=$?
 	fi
 	rm -rf "$probe_dir" 2>/dev/null
 
-	probe "$bin" +show-config --default --no-pager;      cap_show=$?
+	# No `--no-pager` here: it does not exist before Ghostty 1.4, and an unknown
+	# flag makes the whole action exit 1 with no output — indistinguishable from
+	# the action being missing. Bare `+show-config` is understood by every build
+	# this plugin supports.
+	probe "$bin" +show-config --default;                 cap_show=$?
 	probe "$bin" +explain-config --option=font-size;     cap_explain=$?
 	probe "$bin" +list-themes --plain;                   cap_themes=$?
 	probe "$bin" +list-keybinds --default --plain;       cap_keybinds=$?

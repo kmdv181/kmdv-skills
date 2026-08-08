@@ -1,0 +1,83 @@
+#!/usr/bin/env sh
+# A fake `ghostty` for the hermetic tier.
+#
+# Its behaviour is NOT invented — every branch mirrors something tests/contract.sh
+# actually observed on Ghostty 1.3.1. A stub written from the same assumption as
+# the code under test agrees with it by construction and proves nothing, so when
+# the contract tier records different behaviour, this file changes to match it.
+#
+# Recorded, and mirrored below:
+#   +validate-config --config-file=F   valid   -> exit 0, silent
+#                                      unknown -> exit 1, "F:LINE:KEY: unknown field" on STDOUT
+#                                      0 bytes -> exit 1, completely silent
+#                                      missing -> exit 1, completely silent
+#
+# STUB_FAIL_MODE=hang-free knobs for the tests:
+#   STUB_LOG   append each invocation's argv to this file
+set -u
+
+log() { [ -n "${STUB_LOG:-}" ] && printf '%s\n' "$*" >>"$STUB_LOG"; return 0; }
+log "$@"
+
+action=${1:-}
+shift 2>/dev/null || true
+
+case "$action" in
+	+version)
+		echo "Ghostty 1.3.1-stub"
+		;;
+
+	+validate-config)
+		file=""
+		for a in "$@"; do
+			case "$a" in --config-file=*) file=${a#--config-file=} ;; esac
+		done
+
+		# No --config-file: validates the live default paths. Always clean here.
+		[ -n "$file" ] || exit 0
+
+		# Recorded: a missing file and a zero-byte file both exit 1 in silence.
+		[ -f "$file" ] || exit 1
+		[ -s "$file" ] || exit 1
+
+		n=0
+		rc=0
+		while IFS= read -r line || [ -n "$line" ]; do
+			n=$((n + 1))
+			case "$line" in
+				''|'#'*) continue ;;
+			esac
+			key=$(printf '%s' "$line" | sed -e 's/[[:space:]]*=.*//' -e 's/[[:space:]]*$//')
+			# Anything the fixtures declare invalid. Real ghostty knows its own
+			# key list; the stub only needs one reliable way to be told "reject".
+			case "$key" in
+				not-a-real-key|bogus-key|INVALID)
+					printf '%s:%s:%s: unknown field\n' "$file" "$n" "$key"
+					rc=1
+					;;
+			esac
+		done <"$file"
+		exit "$rc"
+		;;
+
+	+show-config)
+		# Recorded: --no-pager is rejected in silence on 1.3.1.
+		for a in "$@"; do
+			case "$a" in --no-pager) exit 1 ;; esac
+		done
+		echo "font-size = 14"
+		;;
+
+	+list-themes)   echo "Stub Theme (resources)" ;;
+	+list-keybinds) echo "keybind = super+shift+,=reload_config" ;;
+	+list-actions)  echo "copy_to_clipboard" ;;
+
+	# Recorded: +explain-config does not exist on 1.3.1.
+	+explain-config)
+		echo "Ghostty failed to initialize!" >&2
+		exit 1
+		;;
+
+	*) exit 1 ;;
+esac
+exit 0

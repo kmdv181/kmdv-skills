@@ -43,7 +43,7 @@ keybind action for the exact version you're running:
 
 ```sh
 ghostty +explain-config --option=font-size
-ghostty +show-config --default --docs --no-pager
+ghostty +show-config --default --docs
 ghostty +list-themes --plain
 ghostty +list-actions
 ```

@@ -34,8 +34,8 @@ paths, which is the right call for "is my current setup healthy?".
 ### `+show-config`
 
 ```sh
-ghostty +show-config --no-pager                    # only keys changed from default
-ghostty +show-config --default --docs --no-pager   # every key, with documentation
+ghostty +show-config                    # only keys changed from default
+ghostty +show-config --default --docs   # every key, with documentation
 ```
 
 `--changes-only` defaults to **true**, so a bare `+show-config` shows the user's
@@ -43,6 +43,14 @@ diffs against the defaults, not the full key set. `--default` ignores the user
 config and implies the full set. Use `--default --docs` when you need the
 authoritative key inventory; use the bare form to see what the user has actually
 customised, including values Ghostty normalised or filled in.
+
+**Do not add `--no-pager`.** It was added after 1.3.0 and older builds reject it
+— and a rejected flag makes the whole action exit 1 printing *nothing*, which
+reads exactly like "this user has customised nothing". It buys nothing anyway:
+the pager only spawns when stdout is a TTY, and when you run this, stdout is a
+pipe. This flag was in these docs for four releases and silently broke
+`+show-config` on every 1.3.x install; `tests/contract.sh` now runs every command
+written here against the real binary so the next one is caught.
 
 ### `+explain-config`
 
