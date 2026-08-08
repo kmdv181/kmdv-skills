@@ -8,11 +8,16 @@ test while telling the agent to treat every valid config key as a typo.
 This is the test for that gap. You run it by hand, and you are the assertion.
 
 - **Part A** — the scripts, against a scratch config. ~5 minutes, zero risk.
-- **Part B** — the agent, in a real Claude session. ~10 minutes, this is the part
-  that matters.
+  **This part is now automated** as `tests/e2e.sh`, which drives the same flow
+  with the real binary and asserts more than a person reasonably can. Run
+  `sh tests/run.sh` instead — and keep Part A for when you want to watch it
+  happen rather than take a test's word for it.
+- **Part B** — the agent, in a real Claude session. ~10 minutes. **This is the
+  part that cannot be automated here**, and the only reason this file exists: no
+  shell test can read SKILL.md and decide what to write to your config.
 - **Part C** — clean up.
 
-Recorded against **Ghostty 1.3.1 on macOS**, plugin **0.1.7**. Check your own
+Recorded against **Ghostty 1.3.1 on macOS**, plugin **0.1.8**. Check your own
 first, because most of what follows is version-specific:
 
 ```sh
@@ -37,13 +42,15 @@ That isolation is the whole reason Part A is safe to run on your daily machine.
 ```sh
 export LAB=$(mktemp -d)
 export XDG_STATE_HOME="$LAB/state"
-export P=~/.claude/plugins/cache/kmdv181/ghostty-config/0.1.7
+export P=$(ls -d ~/.claude/plugins/cache/kmdv181/ghostty-config/*/ | sort -V | tail -1)
 printf 'font-family = Menlo\nfont-size = 13\n' > "$LAB/config.ghostty"
+echo "testing: $P"
 ```
 
-Run everything below in that same shell — the exports are load-bearing. If
-`$P` doesn't exist, `ls ~/.claude/plugins/cache/kmdv181/ghostty-config/` and use
-the version you actually have.
+Run everything below in that same shell — the exports are load-bearing. `$P`
+resolves to the newest installed version rather than a number written here,
+which would go stale on the next release; check the `testing:` line names the
+version you meant.
 
 ### A1 — the probe reports the truth about your install
 
@@ -270,7 +277,7 @@ Your real backup ring is untouched by Part A. Part B wrote to it, which is
 correct — those were real edits. Check what is there:
 
 ```sh
-sh ~/.claude/plugins/cache/kmdv181/ghostty-config/0.1.7/scripts/ghostty-undo.sh --list
+sh "$(ls -d ~/.claude/plugins/cache/kmdv181/ghostty-config/*/ | sort -V | tail -1)/scripts/ghostty-undo.sh" --list
 ```
 
 Once your config is where you want it, the safety copy from B0 can go:
