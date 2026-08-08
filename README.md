@@ -3,7 +3,7 @@
 A personal marketplace: `kmdv181`. Add it once, then install anything from it.
 
 ```
-/plugin marketplace add kmdv181/kmdv-skills
+/plugin marketplace add kmdv181/skills
 /plugin install ghostty-config@kmdv181
 ```
 
@@ -14,7 +14,7 @@ Refresh after pushing changes here:
 ```
 
 `kmdv181` appears twice above and means two different things. In
-`kmdv181/kmdv-skills` it's the GitHub owner, and that whole path follows the
+`kmdv181/skills` it's the GitHub owner, and that whole path follows the
 repository — rename the repo and this line needs updating, here and in
 `plugins/ghostty-config/README.md`. In `@kmdv181` it's the marketplace name, which
 comes from `.claude-plugin/marketplace.json` and is independent of both the owner

@@ -18,7 +18,7 @@ so it has to run on the machine Ghostty is installed on — not on a remote host
 you're SSH'd into from a Ghostty window.
 
 ```sh
-/plugin marketplace add kmdv181/kmdv-skills
+/plugin marketplace add kmdv181/skills
 /plugin install ghostty-config@kmdv181
 ```
 
