@@ -38,7 +38,7 @@ where nothing signals that language is relevant, so it ships as a `SessionStart`
 hook that injects the rule as context. Plugins cannot contribute `CLAUDE.md`
 content; a hook is the only always-on mechanism available to one.
 
-The matcher covers `startup|resume|clear|compact`, so the rule is re-injected
+The matcher covers `startup|resume|clear|compact|fork`, so the rule is re-injected
 after a compaction rather than quietly disappearing mid-session.
 
 ## Codex
