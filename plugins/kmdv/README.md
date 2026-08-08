@@ -7,7 +7,7 @@ project skill of the same name.
 **This plugin currently ships zero skills.** It's the shell to grow into.
 
 ```
-/plugin install kmdv@181-lab
+/plugin install kmdv@kmdv181
 ```
 
 ## Adding a skill
@@ -40,7 +40,7 @@ claude plugin validate ./plugins/kmdv --strict
 git commit && git push
 ```
 
-and in a session: `/plugin marketplace update 181-lab`.
+and in a session: `/plugin marketplace update kmdv181`.
 
 ## When a skill belongs here vs. in `~/.claude/skills/`
 

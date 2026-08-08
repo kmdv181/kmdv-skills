@@ -1,23 +1,26 @@
-# 181 Lab — Claude Code marketplace
+# kmdv181 — Claude Code marketplace
 
-A personal marketplace: `181-lab`. Add it once, then install anything from it.
+A personal marketplace: `kmdv181`. Add it once, then install anything from it.
 
 ```
 /plugin marketplace add kmdv181/kmdv-skills
-/plugin install kmdv@181-lab
-/plugin install ghostty-config@181-lab
+/plugin install kmdv@kmdv181
+/plugin install ghostty-config@kmdv181
 ```
 
 Refresh after pushing changes here:
 
 ```
-/plugin marketplace update 181-lab
+/plugin marketplace update kmdv181
 ```
 
-The `kmdv181/kmdv-skills` part is just this repository's path — update it here and
-in `plugins/ghostty-config/README.md` if the repo is ever renamed. The marketplace
-name (`181-lab`), which is what `@181-lab` refers to, comes from
-`.claude-plugin/marketplace.json` and does not follow the repo name.
+`kmdv181` appears twice above and means two different things. In
+`kmdv181/kmdv-skills` it's the GitHub owner, and that whole path follows the
+repository — rename the repo and this line needs updating, here and in
+`plugins/ghostty-config/README.md`. In `@kmdv181` it's the marketplace name, which
+comes from `.claude-plugin/marketplace.json` and is independent of both the owner
+and the repo name. They match today because that's what reads well, not because
+anything requires it.
 
 ## Plugins
 
@@ -48,7 +51,7 @@ marketplace under that plugin's name.
    accepted by the validator — use the full relative path.
 3. `claude plugin validate . --strict` and
    `claude plugin validate ./plugins/<name> --strict`.
-4. Commit, push, then `/plugin marketplace update 181-lab`.
+4. Commit, push, then `/plugin marketplace update kmdv181`.
 
 ## Do you actually need this?
 

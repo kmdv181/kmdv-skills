@@ -19,7 +19,7 @@ you're SSH'd into from a Ghostty window.
 
 ```sh
 /plugin marketplace add kmdv181/kmdv-skills
-/plugin install ghostty-config@181-lab
+/plugin install ghostty-config@kmdv181
 ```
 
 Set `GHOSTTY_BIN` if your install isn't on `PATH` and isn't at

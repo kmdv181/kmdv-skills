@@ -1,9 +1,9 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
-  "name": "181-lab",
-  "description": "181 Lab — Claude Code plugins and skills by kmdv.",
+  "name": "kmdv181",
+  "description": "kmdv181 — Claude Code plugins and skills by kmdv.",
   "owner": {
-    "name": "181 Lab",
+    "name": "kmdv",
     "email": "i@kmdv.dev"
   },
   "plugins": [
