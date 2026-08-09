@@ -38,15 +38,43 @@ is worse than no fact, because it is trusted.
 - Claude Code reads `CLAUDE.md`, **not** `AGENTS.md`. The supported bridge is an
   `@AGENTS.md` import inside `CLAUDE.md`, which is what this repo does. Import
   parsing skips code spans, so a path in backticks stays literal.
-- **The Codex half of that bridge is unverified.** `AGENTS.md` was written to the
-  conventional path, but no probe confirmed Codex loads it: `codex exec` fails
-  here before reaching a prompt — `gpt-5.6-sol`, `gpt-5.1-codex`, `gpt-5-codex`
-  and `gpt-5.1` are all rejected as "not supported when using Codex with a
-  ChatGPT account" (codex-cli 0.144.5). Re-run the probe on an account that can
-  reach a model before trusting this path.
-- A file in the repo root is not loaded just by existing. Only `CLAUDE.md`,
-  `CLAUDE.local.md` and `.claude/rules/` load on their own; anything else reaches
-  the agent through an `@` import. Verify with `/context` under **Memory files**.
+- **Codex loads the working directory's `AGENTS.md` into context on its own.**
+  Measured on codex-cli 0.147.0, with this repo `trust_level = "trusted"` in
+  `~/.codex/config.toml`. (A global `~/.codex/AGENTS.md` also exists on this
+  machine; whether and how it merges was not probed.) A `codex exec --json` run
+  that forbade tool use
+  answered `TIERS=Hermetic,Contract,End-to-end` — a fact only `AGENTS.md`
+  carries — and emitted no tool call at all; the same prompt run with `-C` on an
+  empty directory answered `NONE`. That negative control is what makes the
+  result mean *loaded into context* rather than *found by grep*.
+- **Codex does not resolve `@` imports.** Same probe, a scratch `AGENTS.md`
+  carrying one canary plus an `@FACTS.md` line, and `FACTS.md` carrying another:
+  the first came back, the second came back `NONE`. So `MEMORY.md` cannot be
+  bridged to Codex by importing it — under Codex the facts file is out of
+  context, and the probe confirmed that directly (`RENAMES=NONE`, a fact only
+  `MEMORY.md` carries).
+- **The pointer in `AGENTS.md` is what puts this file in front of Codex.** Its
+  opening paragraph names `MEMORY.md` and says to read it. Given a task-shaped
+  question about `+show-config --no-pager`, Codex's *first* command was
+  `sed -n '1,240p' MEMORY.md` in **3 of 3** runs. Against a copy of the repo
+  with only that paragraph deleted, **0 of 2** — one never opened the file, the
+  other reached it at command two, inside a grep across the whole plugin. So
+  keep that sentence; it is load-bearing, not decorative. (The control copy
+  still mentions `MEMORY.md` once, under *When you learn something the hard
+  way*, which tells the agent to **write** to it. Removing the read instruction
+  alone was the point.)
+- **But the pointer is not what made the answer right, and don't overread it.**
+  All 5 runs above answered correctly, pointer or not: this particular fact is
+  also in `plugins/ghostty-config/tests/`, and the pointerless runs went and
+  measured the installed binary directly. What the probe shows is *which file
+  Codex opens first*, not that facts here are unreachable without it. A fact
+  that exists **only** in this file, with no test and no binary to interrogate,
+  was never tested — and that is exactly the fact the pointer would be
+  protecting. Small denominators; re-run before leaning harder on this.
+- In Claude Code, a file in the repo root is not loaded just by existing. Only
+  `CLAUDE.md`, `CLAUDE.local.md` and `.claude/rules/` load on their own; anything
+  else reaches the agent through an `@` import. Verify with `/context` under
+  **Memory files**. Codex is the other way round — see the first bullets above.
 - **Nested imports did not resolve here.** `CLAUDE.md` importing `AGENTS.md`,
   which imported `MEMORY.md`, loaded the first and silently dropped the second —
   measured with `claude -p`, which answered `NOT IN CONTEXT` for a fact only
@@ -170,4 +198,3 @@ stale fact.
   and `--no-validate` paths cannot be reached on a machine that has Ghostty,
   because `find_bin` searches `/Applications/Ghostty.app` by absolute path — the
   hermetic tier skips them out loud rather than pretending.
-- Whether Codex loads `AGENTS.md` is still unverified; see *Two CLIs, one manifest*.
