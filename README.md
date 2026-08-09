@@ -39,12 +39,29 @@ requires it.
 | Plugin | Claude Code | Codex | What it is |
 |---|---|---|---|
 | [`always-english-artifacts`](plugins/always-english-artifacts) | yes | yes | Talk to the agent in any language; keep code, comments, Markdown, commit messages and issue text in English. |
-| [`ghostty-config`](plugins/ghostty-config) | yes | — | Conversational editing of the Ghostty terminal config, with validation before write and rollback. |
+| [`ghostty-config`](plugins/ghostty-config) | yes | yes | Conversational editing of the Ghostty terminal config, with validation before write and rollback. |
 
 Codex needs no Codex-specific manifest: it discovers plugins through
 `.claude-plugin/marketplace.json` and loads their components from the default
-paths. `ghostty-config` is marked Claude-only because it has not been exercised
-under Codex, not because anything blocks it.
+paths.
+
+The two `yes`es in the Codex column were not earned the same way, and only one
+of them was measured today. `always-english-artifacts` is its owner's to vouch
+for; what follows is about `ghostty-config` alone.
+
+`ghostty-config` now says `yes` for Codex because the whole cycle was run there,
+not because the install succeeded. Against a fixture config under a redirected
+`HOME`, on codex-cli 0.147.0 and Ghostty 1.3.1: Codex loaded the `edit` skill,
+ran the plugin's own `ghostty-env.sh`, checked the key against the installed
+binary, offered a diff and waited, wrote on confirmation with a timestamped
+backup — then the `undo` skill listed that backup, showed its diff, waited
+again, and restored a file that `+validate-config` accepts.
+
+One thing that run is worth remembering for: with the sandbox denying writes
+outside the workspace, `ghostty-apply.sh` failed to stage its candidate, and the
+agent said so and handed back the exact command rather than reporting success it
+hadn't achieved. Under Codex the sandbox is a real participant in this plugin —
+give it a session that can write where the config lives.
 
 ## Layout
 
@@ -62,6 +79,22 @@ marketplace under that plugin's name.
 A `.codex-plugin/plugin.json` was tried and removed: with it absent from both
 the marketplace snapshot and the install cache, Codex still loaded the plugin's
 hook. It buys nothing and would add a second `version` field to keep in step.
+
+## The repo's own instructions reach the two CLIs differently
+
+Working rules live in `AGENTS.md`, accumulated facts in `MEMORY.md`, one copy
+each. How they arrive is not symmetric, and both halves are measured:
+
+- **Claude Code** reads `CLAUDE.md` only, which imports both by name. Imports
+  must stay first-level — a nested one silently resolved to nothing here.
+- **Codex** reads the working directory's `AGENTS.md` into context by itself,
+  and resolves no imports at all. So `MEMORY.md` is *not* in its context.
+
+What bridges that second gap is a sentence: `AGENTS.md` opens by naming
+`MEMORY.md` and saying to read it, and with it there Codex opened that file
+first thing in 3 of 3 runs, against 0 of 2 with the sentence deleted. Keep it.
+`MEMORY.md` carries the probes and their negative controls under *Two CLIs, one
+manifest*.
 
 ## Adding a plugin
 

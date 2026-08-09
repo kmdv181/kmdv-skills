@@ -71,6 +71,23 @@ is worse than no fact, because it is trusted.
   that exists **only** in this file, with no test and no binary to interrogate,
   was never tested — and that is exactly the fact the pointer would be
   protecting. Small denominators; re-run before leaning harder on this.
+- **Driving a plugin under Codex, the harness details.** `ghostty-config` was run
+  end to end there (see README for what it proved). Three things cost time:
+  `codex exec resume` takes the global options *before* the subcommand —
+  `codex exec -s workspace-write resume --last "…"`, not after `--last`, which
+  errors with `unexpected argument '-s'`. Custom env vars reach the spawned shell
+  only with `-c shell_environment_policy.inherit=all`. And to keep a probe off
+  the real config, redirect **`HOME`** and pin `CODEX_HOME=~/.codex` so Codex
+  still finds its own auth and plugin cache — `GHOSTTY_APP_SUPPORT` looks like an
+  override and is not one: `ghostty-env.sh:16` assigns it a relative path
+  unconditionally, so exporting it does nothing and the probe walks straight into
+  the live config.
+- **The sandbox is part of this plugin's behaviour under Codex.** With
+  `-s workspace-write` and the config outside the workspace, `ghostty-apply.sh`
+  cannot stage its candidate — `cp: … Operation not permitted` — and the run ends
+  with the agent handing back a command instead of a change. That is the correct
+  outcome, not a defect, but it means a Codex session must be able to write where
+  the config lives before this plugin can finish anything.
 - In Claude Code, a file in the repo root is not loaded just by existing. Only
   `CLAUDE.md`, `CLAUDE.local.md` and `.claude/rules/` load on their own; anything
   else reaches the agent through an `@` import. Verify with `/context` under
