@@ -88,13 +88,16 @@ is worse than no fact, because it is trusted.
   with the agent handing back a command instead of a change. That is the correct
   outcome, not a defect, but it means a Codex session must be able to write where
   the config lives before this plugin can finish anything.
-- **This machine now has a second harness, already wired up.** As of 2026-08-09
-  the `kmdv181` marketplace is registered in Codex and `ghostty-config` 0.1.11 is
-  installed and enabled there — snapshot under `~/.codex/.tmp/marketplaces/kmdv181`,
-  install cache under `~/.codex/plugins/cache/kmdv181/<plugin>/<version>`, the
-  same version-keyed shape Claude Code uses. So a behavioural probe no longer
-  needs a setup step, and any claim about how a skill reads can now be checked in
-  two harnesses instead of one. Left installed at the user's request.
+- **Codex can be a second harness — but that setup is per-machine. Check, don't
+  assume.** `codex plugin list` is the one command that settles it; this entry is
+  in git and the setup is not, so it travels to machines it isn't true of. Where
+  it is wired up, the snapshot sits under `~/.codex/.tmp/marketplaces/<name>` and
+  the install cache under `~/.codex/plugins/cache/<name>/<plugin>/<version>` —
+  the same version-keyed shape Claude Code uses. Where it isn't, README's Codex
+  block is the two commands that fix it. It was done on one machine on
+  2026-08-09 (`ghostty-config` 0.1.11, left installed at the user's request), and
+  it matters because it makes a claim about how a skill *reads* checkable in two
+  harnesses instead of one — which is the shape of the largest open work here.
 - In Claude Code, a file in the repo root is not loaded just by existing. Only
   `CLAUDE.md`, `CLAUDE.local.md` and `.claude/rules/` load on their own; anything
   else reaches the agent through an `@` import. Verify with `/context` under
@@ -223,8 +226,8 @@ stale fact.
   because `find_bin` searches `/Applications/Ghostty.app` by absolute path — the
   hermetic tier skips them out loud rather than pretending.
 - **Shipping an update to Codex is untested.** `AGENTS.md`'s release checklist is
-  written for the `claude` CLI, and Codex now has this plugin installed too, with
-  its own snapshot and its own version-keyed cache. `codex plugin marketplace
+  written for the `claude` CLI, and wherever Codex has this plugin installed it
+  keeps its own snapshot and its own version-keyed cache. `codex plugin marketplace
   upgrade` runs clean, but nobody has bumped a version and confirmed the
   *installed* copy under Codex actually changed — which is exactly the check that
   caught `claude plugin update` serving stale files. Until someone does, assume a
