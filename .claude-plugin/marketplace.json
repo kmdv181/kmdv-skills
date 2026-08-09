@@ -28,6 +28,17 @@
         "name": "kmdv",
         "email": "i@kmdv.dev"
       }
+    },
+    {
+      "name": "nightcap",
+      "source": "./plugins/nightcap",
+      "description": "A memory checkpoint an agent can call on itself. It decides what this session is worth remembering, distils that into persistent beads memory, and seals one key with the state of play and the next move — before compaction or the end of the day takes it.",
+      "category": "productivity",
+      "version": "0.1.0",
+      "author": {
+        "name": "kmdv",
+        "email": "i@kmdv.dev"
+      }
     }
   ]
 }
