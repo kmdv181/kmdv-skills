@@ -127,6 +127,32 @@ and reads, to the next session, as a problem already solved.
 The `claude` CLI is the release tool regardless of which agent is doing the work;
 these steps are facts about this repository, not about a particular harness.
 
+## Anything that leaves this conversation is English
+
+The rule itself lives in `plugins/always-english-artifacts/rules/artifact-language.md`
+and is deliberately not restated here — one copy. Read it there. It already names
+commit messages, branch names, and **PR titles and bodies** among the things it
+covers, so nothing below is a new requirement. What follows is the part this
+repository got wrong anyway.
+
+**Quoted evidence is not exempt.** A pull request here shipped with Russian
+strings in its body because the probes that produced them ran in Russian, and
+measured output felt like *data* rather than prose. It is prose the moment it
+lands in a PR, a commit message or a `MEMORY.md` entry, and a reader who does not
+speak the language now cannot check your evidence — which is the entire reason
+this repository writes evidence down. Translate it, or state the finding instead:
+*"the seal kept the offer in the language it was made in"* carries the same
+result and survives every reader.
+
+The one place another language belongs in a file that ships is where it is
+**functional** — a trigger word in a skill's `description`, a test input chosen
+precisely because a non-English request is what's under test. That is user-facing
+copy for readers of that language, which the rule already allows. Prose *about*
+the work never is.
+
+When talking to the user, follow their language. That is conversation, not an
+artifact.
+
 ## When you learn something the hard way
 
 Add it to `MEMORY.md`, in the section it belongs to, as one entry that names the
