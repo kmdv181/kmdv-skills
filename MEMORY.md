@@ -54,6 +54,32 @@ is worse than no fact, because it is trusted.
   import first-level, alone on its line, with no trailing punctuation, and
   re-probe after touching them.
 
+## Picking up after a session ends
+
+A session's reasoning does not survive it. What survives is what got written
+down, so this is the order to reach for, strongest first.
+
+- **The repo loads itself.** In a session started here, `CLAUDE.md` is read
+  automatically and pulls in `AGENTS.md` and `MEMORY.md`. Measured, not assumed:
+  a `claude -p` asking for a fact only `MEMORY.md` carries answered from context
+  with no file reads. Nothing else needs doing — start a session and the rules
+  and facts are already there.
+- **The tests re-establish ground truth in seconds.** `sh plugins/ghostty-config/tests/run.sh`
+  drives all three tiers against the real binary and the installed copy. Trust it
+  over any recollection, including this file's.
+- **`git log` is the archive of *why*.** Commit messages here deliberately carry
+  the reasoning and the evidence, not a summary of the diff. `git log -p
+  plugins/ghostty-config` reads as a post-mortem of every defect found.
+- **The literal conversation is on disk**, per session, at
+  `~/.claude/projects/<slugified-repo-path>/<session-id>.jsonl`. Reopen it with
+  `claude --continue`, or `claude --resume <id>`, or `--resume <id> --fork-session`
+  to branch without touching the original. Machine-local, never in git, and large
+  — a long session runs to megabytes and will be partly compacted on reload.
+- **Auto memory has been empty here.** As of 2026-08-09 the project directory
+  above contained transcripts and no `memory/` subdirectory at all, so Claude
+  Code had written itself nothing across several sessions. Don't rely on it as a
+  continuity mechanism; write to this file instead.
+
 ## Ghostty's CLI
 
 All established against **Ghostty 1.3.1 on macOS**, by running the binary and by
@@ -123,3 +149,25 @@ Two things follow, and both are now load-bearing in this repo:
   listing them by hand, so a command written into a reference tomorrow is executed
   against the real binary tomorrow. Distinguish *action absent on this build*
   (fine, probe for it) from *action present and called wrongly* (a defect).
+
+## Known gaps, as of 2026-08-09
+
+Facts about what has *not* been checked. Delete an entry when it stops being
+true — an unfinished thread left here after it closes is as misleading as a
+stale fact.
+
+- **No automated test reads the skills' prose.** Both tiers pass on instructions
+  that tell an agent to do the wrong thing; that is exactly how 0.1.5 shipped.
+  `plugins/ghostty-config/tests/MANUAL.md` Part B covers it by hand and has been
+  run once, by a person. The way to automate it is a skill eval — the
+  `skill-creator` skill runs evals and measures variance across repeats — which
+  nobody has built here. It is the largest open piece of work on this plugin.
+- **One Ghostty build.** Everything is measured against 1.3.1 on macOS. The 1.4+
+  branch of the edit skill's Step 2 is derived from Ghostty's source and has
+  never been executed.
+- **No Linux, and no machine without Ghostty.** The Linux config-path branch is
+  exercised only through a fake `uname` in the hermetic tier. The `exit 2` refusal
+  and `--no-validate` paths cannot be reached on a machine that has Ghostty,
+  because `find_bin` searches `/Applications/Ghostty.app` by absolute path — the
+  hermetic tier skips them out loud rather than pretending.
+- Whether Codex loads `AGENTS.md` is still unverified; see *Two CLIs, one manifest*.
