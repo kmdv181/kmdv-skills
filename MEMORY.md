@@ -88,6 +88,13 @@ is worse than no fact, because it is trusted.
   with the agent handing back a command instead of a change. That is the correct
   outcome, not a defect, but it means a Codex session must be able to write where
   the config lives before this plugin can finish anything.
+- **This machine now has a second harness, already wired up.** As of 2026-08-09
+  the `kmdv181` marketplace is registered in Codex and `ghostty-config` 0.1.11 is
+  installed and enabled there — snapshot under `~/.codex/.tmp/marketplaces/kmdv181`,
+  install cache under `~/.codex/plugins/cache/kmdv181/<plugin>/<version>`, the
+  same version-keyed shape Claude Code uses. So a behavioural probe no longer
+  needs a setup step, and any claim about how a skill reads can now be checked in
+  two harnesses instead of one. Left installed at the user's request.
 - In Claude Code, a file in the repo root is not loaded just by existing. Only
   `CLAUDE.md`, `CLAUDE.local.md` and `.claude/rules/` load on their own; anything
   else reaches the agent through an `@` import. Verify with `/context` under
@@ -215,3 +222,11 @@ stale fact.
   and `--no-validate` paths cannot be reached on a machine that has Ghostty,
   because `find_bin` searches `/Applications/Ghostty.app` by absolute path — the
   hermetic tier skips them out loud rather than pretending.
+- **Shipping an update to Codex is untested.** `AGENTS.md`'s release checklist is
+  written for the `claude` CLI, and Codex now has this plugin installed too, with
+  its own snapshot and its own version-keyed cache. `codex plugin marketplace
+  upgrade` runs clean, but nobody has bumped a version and confirmed the
+  *installed* copy under Codex actually changed — which is exactly the check that
+  caught `claude plugin update` serving stale files. Until someone does, assume a
+  fix reaches Claude Code and not Codex, and verify with `codex plugin list`
+  before believing otherwise.
