@@ -17,13 +17,17 @@ This is the test for that gap. You run it by hand, and you are the assertion.
   shell test can read SKILL.md and decide what to write to your config.
 - **Part C** — clean up.
 
-Recorded against **Ghostty 1.3.1 on macOS**, plugin **0.1.8**. Check your own
-first, because most of what follows is version-specific:
+Recorded against **Ghostty 1.3.1 on macOS**. Check yours first, because most of
+what follows is version-specific to Ghostty:
 
 ```sh
 /Applications/Ghostty.app/Contents/MacOS/ghostty +version | head -1
 claude plugin details ghostty-config@kmdv181 | head -1
 ```
+
+This file ships inside the plugin, so its own version is whichever one you
+installed — the second command tells you, and stating it here would only be one
+more number to leave behind on the next release.
 
 If your Ghostty is 1.4 or newer, expect three documented differences: A1 reports
 `explain_config: true`, B2 takes the `+explain-config` branch instead of the
