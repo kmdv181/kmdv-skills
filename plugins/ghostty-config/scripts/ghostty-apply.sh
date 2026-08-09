@@ -145,16 +145,42 @@ fi
 backup_dir="${XDG_STATE_HOME:-$HOME/.local/state}/ghostty-config-plugin/backups"
 backup_keep="${GHOSTTY_BACKUP_KEEP:-5}"
 
+# Normalise the count to a plain decimal before any arithmetic touches it, and
+# fold everything unusable onto 0, which means unlimited. Three ways this bit:
+#
+#   `08`  POSIX arithmetic reads a leading zero as octal, and 8 is not an octal
+#         digit — `$((08 + 1))` is a fatal "value too great for base" that killed
+#         the script *after* the backup and *before* the move, so every apply
+#         silently left the config unchanged.
+#   `010` same rule, no error: it quietly meant 8 rather than 10.
+#   `00`  all digits, so the old guard's `*[!0-9]*` missed it, and it is not the
+#         literal `0` the next branch matched. It fell through to `tail -n +1`,
+#         which deleted the entire ring including the backup just taken — while
+#         the apply reported success.
+#
+# Stripping leading zeros makes each of those read the way a person meant it.
+case "$backup_keep" in
+	''|*[!0-9]*)
+		# Not a plain number. Keep everything rather than guess at an intent, but
+		# say so: a typo that silently disables pruning is worth one line.
+		[ -z "${GHOSTTY_BACKUP_KEEP:-}" ] ||
+			printf 'Note: GHOSTTY_BACKUP_KEEP=%s is not a number; keeping every backup.\n' \
+				"$GHOSTTY_BACKUP_KEEP" >&2
+		backup_keep=0
+		;;
+	*)
+		backup_keep="$(printf '%s' "$backup_keep" | sed 's/^0*//')"
+		[ -n "$backup_keep" ] || backup_keep=0   # the value was all zeros
+		;;
+esac
+
 # Keep the ring at `backup_keep` entries, newest first. Names begin with a
 # timestamp, so a reverse lexical sort is a reverse chronological one — but only
 # under LC_ALL=C. Locale collation ignores punctuation and silently reordered
 # these, which pruned the newest entry instead of the oldest. Each backup's
 # `.origin` sidecar goes with it.
 prune_backups() {
-	case "$backup_keep" in
-		''|*[!0-9]*) return 0 ;;   # not a number: keep everything rather than guess
-		0) return 0 ;;             # 0 means unlimited
-	esac
+	[ "$backup_keep" -eq 0 ] && return 0   # 0, or anything unusable, means unlimited
 	find "$backup_dir" -maxdepth 1 -type f ! -name '*.origin' 2>/dev/null |
 		LC_ALL=C sort -r | tail -n "+$((backup_keep + 1))" |
 		while IFS= read -r old; do

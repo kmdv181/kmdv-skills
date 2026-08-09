@@ -233,6 +233,70 @@ orphans=$(find "$BACKUPS" -name '*.origin' | wc -l | tr -d ' ')
 	bad "$orphans .origin files for 3 backups — sidecars are leaking"
 [ "$(cat "$CONFIG")" = "v5" ] && ok "the live config is the newest write" || bad "config is $(cat "$CONFIG"), expected v5"
 
+# GHOSTTY_BACKUP_KEEP, at the values a person actually types. Every one of these
+# reaches shell arithmetic, where a leading zero means octal — so the interesting
+# inputs are not big or negative, they are `08` and `00`.
+echo
+echo "  --- GHOSTTY_BACKUP_KEEP edge values ---"
+
+# Sets RING (surviving backups) and LIVE (the config's final contents). Not a
+# command substitution: that would run new_sandbox in a subshell and lose it.
+ring_after() {
+	_keep=$1; _n=$2
+	new_sandbox
+	printf 'font-size = 10\n' >"$CONFIG"
+	_i=1
+	while [ "$_i" -le "$_n" ]; do
+		printf 'font-size = %s\n' "$((10 + _i))" >"$SBOX/cand"
+		env ${_keep:+GHOSTTY_BACKUP_KEEP="$_keep"} HOME="$SBOX/home" \
+		    XDG_CONFIG_HOME="$SBOX/home/.config" XDG_STATE_HOME="$SBOX/state" \
+		    GHOSTTY_BIN="$STUB" FAKE_UNAME=Darwin PATH="$tmp/bin:$PATH" \
+		    sh "$root/scripts/ghostty-apply.sh" --new "$SBOX/cand" --config "$CONFIG" \
+		    >/dev/null 2>&1
+		_i=$((_i + 1))
+	done
+	RING=$(backup_count)
+	LIVE=$(cat "$CONFIG")
+}
+
+ring_is() {   # label  keep  applies  expected-count
+	ring_after "$2" "$3"
+	[ "$RING" -eq "$4" ] && ok "$1" || bad "$1 — ring holds $RING, expected $4"
+}
+
+ring_is "unset keeps the documented default of 5"  ""    6  5
+ring_is "1 keeps a single backup"                  1     6  1
+ring_is "0 means unlimited"                        0     6  6
+
+# `00` is all digits, so a `*[!0-9]*` guard misses it, and it is not the literal
+# `0` either. It used to fall through to `tail -n +1` and delete the whole ring,
+# including the backup taken moments earlier, while the apply reported success.
+ring_is "00 means unlimited, like 0"               00    6  6
+
+# `08` is not a valid octal number. `$((08 + 1))` is fatal, and it killed the
+# script after the backup and before the move — so the config never changed and
+# the failure looked like nothing happening.
+ring_after 08 12
+[ "$RING" -eq 8 ] && ok "08 keeps 8, read as decimal" || bad "08 kept $RING, expected 8"
+[ "$LIVE" = "font-size = 22" ] && ok "08 does not abort the apply — the config still advanced" ||
+	bad "08 left the config at '$LIVE'; the apply died before writing"
+
+ring_is "010 keeps 10, not octal 8"                010   12 10
+
+# An unusable value keeps everything rather than guessing — but must say so,
+# because silently disabling pruning is not something to discover months later.
+ring_is "an unusable value keeps everything"       5x    6  6
+new_sandbox
+printf 'font-size = 10\n' >"$CONFIG"
+printf 'font-size = 11\n' >"$SBOX/cand"
+err=$(env GHOSTTY_BACKUP_KEEP=5x HOME="$SBOX/home" XDG_CONFIG_HOME="$SBOX/home/.config" \
+	XDG_STATE_HOME="$SBOX/state" GHOSTTY_BIN="$STUB" FAKE_UNAME=Darwin PATH="$tmp/bin:$PATH" \
+	sh "$root/scripts/ghostty-apply.sh" --new "$SBOX/cand" --config "$CONFIG" 2>&1 >/dev/null)
+case "$err" in
+	*GHOSTTY_BACKUP_KEEP*not\ a\ number*) ok "an unusable value is reported on stderr" ;;
+	*) bad "an unusable value was accepted silently: [$err]" ;;
+esac
+
 # No binary: refuse rather than write unverified.
 #
 # apply.sh discovers ghostty at absolute paths, so "no ghostty on this machine"

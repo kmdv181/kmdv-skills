@@ -88,6 +88,24 @@ installed, and is the reason to trust or distrust this section.
 - A pager only spawns when stdout is a TTY (`src/cli/Pager.zig`), and an agent's
   stdout is a pipe. There is never a reason to reach for `--no-pager`.
 
+## POSIX shell
+
+- **A leading zero makes `$(( ))` read octal.** `$((010 + 1))` is 9, not 11, and
+  `$((08 + 1))` is a *fatal* `value too great for base` that kills the script
+  where it stands. Both reached `ghostty-apply.sh` through `GHOSTTY_BACKUP_KEEP`:
+  `010` silently meant 8, and `08` aborted the apply after the backup and before
+  the move, so the config never changed and the failure looked like nothing
+  happening. `10#` forces decimal in bash but is not POSIX — strip leading zeros
+  with `sed 's/^0*//'` before any arithmetic, and treat the all-zeros result as 0.
+- A `case` guard of `''|*[!0-9]*` does **not** catch `00`: it is all digits, and
+  it is not the literal `0` a following branch matches. It fell through to
+  `tail -n +1` and deleted an entire backup ring, including the backup taken
+  seconds earlier, while the command reported success. Normalise the value once,
+  up front, instead of enumerating spellings in a `case`.
+- Sort backup filenames under `LC_ALL=C`. Locale collation ignores punctuation
+  and reordered timestamp-plus-counter names, which made "oldest" resolve to the
+  newest entry and pruned the wrong end.
+
 ## One root cause, four defects
 
 `ghostty-config` shipped 0.1.4 with four defects that automated validation passed
