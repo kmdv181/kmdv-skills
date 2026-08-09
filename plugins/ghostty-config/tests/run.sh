@@ -25,7 +25,10 @@ skipped=""
 # older tree. Both tiers below test $src by default; this says whether that is
 # also what the user's sessions load.
 name=$(basename "$src")
-cache=$(ls -d "$HOME/.claude/plugins/cache"/*/"$name"/* 2>/dev/null | tail -1)
+# sort -V, not a plain lexical sort: with 0.1.9 and 0.1.10 both installed, `tail -1`
+# picks 0.1.9 and the drift check then compares against the wrong version and
+# reports a difference that isn't there. Found the day 0.1.10 shipped.
+cache=$(ls -d "$HOME/.claude/plugins/cache"/*/"$name"/* 2>/dev/null | sort -V | tail -1)
 echo "installed-copy drift"
 if [ -z "$cache" ]; then
 	echo "  --    $name is not installed from a marketplace; only the working tree was tested"
