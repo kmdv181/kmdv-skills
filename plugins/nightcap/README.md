@@ -71,12 +71,10 @@ a second nightcap replaces the first rather than piling up beside it.
 
 ## No quality gates
 
-An earlier draft opened with "run the tests and linters". It is gone.
-
-Gates are not memory, they need no judgment, and a heavyweight blocking step at
-the front is exactly what stops a checkpoint being cheap enough to run whenever
-it is worth running. `bd` has its own session-close protocol if that is what you
-want.
+It does not run your tests or linters first. Gates are not memory, they need no
+judgment, and a heavyweight blocking step at the front is exactly what stops a
+checkpoint being cheap enough to run whenever it is worth running. `bd` has its
+own session-close protocol if that is what you want.
 
 ## Why `bd note` and never `bd update --notes`
 
@@ -85,19 +83,11 @@ stopping point an earlier session left there — precisely the information the
 next session came for — and the transcript shows nothing wrong. `bd note`
 appends.
 
-Verified against bd 1.1.2, and re-verified on every test run:
-
-```
-ok      --notes REPLACES the notes field (why the skill forbids it for handoff)
-ok      bd note appends, preserving what was already there
-```
-
 ## Why keys are namespaced
 
 Memory keys are `<name>/<topic>` so several agents can share one store without
 overwriting each other. `<name>` is the identity the session was launched under,
 or else the actor bd itself resolves (`$BEADS_ACTOR`, git `user.name`, `$USER`).
-Slashes in a key are legal — the suite asserts it rather than assuming it.
 
 ## No `allowed-tools`
 
@@ -113,11 +103,10 @@ sh plugins/nightcap/tests/run.sh
 ```
 
 Every `bd` command and flag in the suite is **extracted from `SKILL.md` itself**
-and probed against your installed binary, so a command added to the skill
-tomorrow is checked tomorrow — and one deleted stops being checked, which is how
-the gates disappearing took `bd create -p 1` out of the suite with no edit. It
-also asserts the behaviours the skill's advice depends on. No `bd`? The tier
-skips loudly and says nothing was verified.
+and probed against your installed binary, so the skill is checked against the bd
+you actually have rather than the one it was written for. It also asserts the
+behaviours the skill's advice depends on. No `bd`? The tier skips loudly and says
+nothing was verified.
 
 What it cannot check is the judgment the skill actually asks for. `tests/MANUAL.md`
 is the hand-run session that covers it — start there before trusting a green run.
