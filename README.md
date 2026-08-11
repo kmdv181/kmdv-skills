@@ -40,14 +40,17 @@ requires it.
 |---|---|---|---|
 | [`always-english-artifacts`](plugins/always-english-artifacts) | yes | yes | Talk to the agent in any language; keep code, comments, Markdown, commit messages and issue text in English. |
 | [`ghostty-config`](plugins/ghostty-config) | yes | yes | Conversational editing of the Ghostty terminal config, with validation before write and rollback. |
+| [`nightcap`](plugins/nightcap) | yes | untested | A memory checkpoint an agent calls on itself: decide what the session is worth remembering, distil it into beads memory, seal the next move. |
 
 Codex needs no Codex-specific manifest: it discovers plugins through
 `.claude-plugin/marketplace.json` and loads their components from the default
 paths.
 
-The two `yes`es in the Codex column were not earned the same way, and only one
-of them was measured today. `always-english-artifacts` is its owner's to vouch
-for; what follows is about `ghostty-config` alone.
+The `yes`es in the Codex column were not earned the same way, and only one of
+them was measured today. `always-english-artifacts` is its owner's to vouch for;
+what follows is about `ghostty-config` alone. `nightcap` says `untested` because
+it is: it has no reason not to work there — it ships prose and no hooks — but
+nobody has run it under Codex, and this column records runs, not expectations.
 
 `ghostty-config` now says `yes` for Codex because the whole cycle was run there,
 not because the install succeeded. Against a fixture config under a redirected

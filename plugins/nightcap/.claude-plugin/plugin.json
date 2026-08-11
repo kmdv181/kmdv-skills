@@ -1,0 +1,19 @@
+{
+  "name": "nightcap",
+  "version": "0.1.0",
+  "description": "Lets an agent decide for itself what this session is worth remembering, and write it down before it is lost. Distils the session into persistent beads memory and seals one overwritable key holding the state of play and the next move. Requires `bd` on PATH and a beads workspace.",
+  "author": {
+    "name": "kmdv",
+    "email": "i@kmdv.dev"
+  },
+  "license": "MIT",
+  "keywords": [
+    "beads",
+    "bd",
+    "handoff",
+    "session",
+    "memory",
+    "context",
+    "compaction"
+  ]
+}

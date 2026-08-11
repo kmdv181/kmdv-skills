@@ -27,6 +27,37 @@ is worse than no fact, because it is trusted.
   doesn't.
 - A private repo works fine as a marketplace. This one is public by choice, not
   necessity. Revisit that the moment anything personal lands here.
+- **Testing a plugin before push, without disturbing the real marketplace.**
+  `kmdv181` is registered here from GitHub, so `claude plugin marketplace add
+  <local path>` collides on the name. Copy `.claude-plugin/` and `plugins/` to a
+  scratch dir, `sed` the marketplace `name` to `kmdv181-local`, add *that*, and
+  install from it — `claude plugin details <plugin>@kmdv181-local` then gives the
+  real component inventory pre-push. Uninstall and `marketplace remove` after, or
+  you leave a marketplace pointing at a `/tmp` path that no longer exists.
+- **A skill's triggering can be measured, in three arms, for about $3.**
+  `claude -p "<trigger>" --allowed-tools "Skill" --disallowed-tools "Bash"` in a
+  scratch workspace fires the skill while denying it any way to mutate anything.
+  Measured on `nightcap` 0.1.0 with the skill's non-English wrap-up trigger:
+  **enabled**, the agent ran the protocol and refused to improvise a substitute;
+  **disabled** (`claude plugin disable <plugin>@<marketplace>`), it acknowledged
+  the word and did nothing; **unrelated prompt** (a POSIX sh question), one turn,
+  skill never invoked. The first arm alone proves nothing — arm 2 is what makes it a
+  measurement, and arm 3 is the one that catches a description broad enough to
+  fire on everything. ~$1.20 each, so this is affordable on every skill that
+  ships.
+- **`bd init` writes a Claude Code SessionStart hook, and that is why memory
+  reaches the next session.** It creates `.claude/settings.json` with
+  `bd prime --hook-json`, plus `CLAUDE.md`, `AGENTS.md`, `.agents/` and
+  `.codex/`. Found by running `bd init` 1.1.2 in an empty scratch repo and
+  listing what appeared. It matters because a skill that *writes* to bd memory
+  can rely on the read half already being wired — no plugin needs to ship a
+  priming hook, and under Codex there is no hook-trust prompt to explain.
+- **A description rewrite invalidates arms 1 and 3, and cannot touch arm 2.**
+  `nightcap`'s was broadened from an end-of-session ritual to "whenever you are
+  holding something worth keeping" — exactly the change that could make a skill
+  fire constantly. Arms 1 and 3 were re-run and both held. Arm 2 was not, and
+  did not need to be: with the plugin disabled the description is not in context
+  at all, so no edit to it can change that arm's result.
 
 ## Two CLIs, one manifest
 
